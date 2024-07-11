@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: MIT
+// Generated with Spectral Syntax
+
+pragma solidity >=0.8.0;
+
+contract WeekendCalculator {
+    uint256 constant SECONDS_PER_DAY = 86400;
+    uint256 constant SECONDS_PER_WEEK = 604800;
+    uint256 constant DOW_SAT = 6;
+    uint256 constant DOW_SUN = 7;
+
+    function _daysToDate(uint256 _days) internal pure returns (uint256 year, uint256 month, uint256 day) {
+        uint256 L = _days + 68569;
+        uint256 N = 4 * L / 146097;
+        L = L - (146097 * N + 3) / 4;
+        uint256 year = 4000 * (L + 1) / 1461001;
+        L = L - 1461 * year / 4 + 31;
+        uint256 month = 80 * L / 2447;
+        uint256 day = L - 2447 * month / 80;
+        L = month / 11;
+        month = month + 3 - 12 * L;
+        year = year - 4900 + (month - 14) / 12;
+        return (year, month, day);
+    }
+
+    function getDayOfWeek(uint256 timestamp) internal pure returns (uint256 dayOfWeek) {
+        uint256 _days = timestamp / SECONDS_PER_DAY;
+        dayOfWeek = ((_days + 3) % 7) + 1;
+    }
+
+    function getYear(uint256 timestamp) internal pure returns (uint256 year) {
+        (year,,) = _daysToDate(timestamp / SECONDS_PER_DAY);
+    }
+
+    function isWeekEnd(uint256 timestamp) internal pure returns (bool weekEnd) {
+        weekEnd = getDayOfWeek(timestamp) >= DOW_SAT;
+    }
+
+    function countWeekEndsInYear(uint256 year) internal pure returns (uint256 weekEnds) {
+        for (uint256 i = 0; i < 365; i++) {
+            if (isWeekEnd(year * SECONDS_PER_YEAR + i * SECONDS_PER_DAY)) {
+                weekEnds++;
+            }
+        }
+        if (isLeapYear(year)) {
+            if (isWeekEnd((year + 1) * SECONDS_PER_YEAR)) {
+                weekEnds++;
+            }
+        }
+        return weekEnds;
+    }
+
+    function countWeekEndsInRussia(uint256 year) internal pure returns (uint256 weekEnds) {
+        for (uint256 i = 0; i < 365; i++) {
+            if (isWeekEnd(year * SECONDS_PER_YEAR + i * SECONDS_PER_DAY)) {
+                weekEnds++;
+            }
+        }
+        if (isLeapYear(year)) {
+            if (isWeekEnd((year + 1) * SECONDS_PER_YEAR)) {
+                weekEnds++;
+            }
+        }
+        return weekEnds;
+    }
+
+    function isLeapYear(uint256 year) internal pure returns (bool leapYear) {
+        leapYear = ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+    }
+}
